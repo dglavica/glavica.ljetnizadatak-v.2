@@ -159,6 +159,7 @@ public class Izbornik extends javax.swing.JFrame {
 
     private void btnBenzinskeCrpkeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBenzinskeCrpkeActionPerformed
         new FormaBenzinskaCrpka().setVisible(true);
+       
 
     }//GEN-LAST:event_btnBenzinskeCrpkeActionPerformed
 

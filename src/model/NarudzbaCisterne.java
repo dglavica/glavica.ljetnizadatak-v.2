@@ -8,8 +8,10 @@ package model;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 
@@ -21,16 +23,25 @@ import javax.persistence.Temporal;
 @Table
 public class NarudzbaCisterne extends Entitet implements Serializable {
 
+    @OneToMany(mappedBy = "narudzbaCisterne")
+    private List<NarudzbaGorivo> narudzbaGoriva;
+
     @Temporal(javax.persistence.TemporalType.DATE)
     private Date vrijemeNarudzbe;
     @Temporal(javax.persistence.TemporalType.DATE)
     private Date vrijemeIsporuke;
-    private BigDecimal kolicina, nabavnaCijena, trosak;
+
+    public List<NarudzbaGorivo> getNarudzbaGoriva() {
+        return narudzbaGoriva;
+    }
+
+    public void setNarudzbaGoriva(List<NarudzbaGorivo> narudzbaGoriva) {
+        this.narudzbaGoriva = narudzbaGoriva;
+    }
+    private BigDecimal trosak;
 
     @ManyToOne
     private BenzinskaCrpka benzinskaCrpka;
-    @ManyToOne
-    private Gorivo gorivo;
 
     public Date getVrijemeNarudzbe() {
         return vrijemeNarudzbe;
@@ -48,22 +59,6 @@ public class NarudzbaCisterne extends Entitet implements Serializable {
         this.vrijemeIsporuke = vrijemeIsporuke;
     }
 
-    public BigDecimal getKolicina() {
-        return kolicina;
-    }
-
-    public void setKolicina(BigDecimal kolicina) {
-        this.kolicina = kolicina;
-    }
-
-    public BigDecimal getNabavnaCijena() {
-        return nabavnaCijena;
-    }
-
-    public void setNabavnaCijena(BigDecimal nabavnaCijena) {
-        this.nabavnaCijena = nabavnaCijena;
-    }
-
     public BigDecimal getTrosak() {
         return trosak;
     }
@@ -78,14 +73,6 @@ public class NarudzbaCisterne extends Entitet implements Serializable {
 
     public void setBenzinskaCrpka(BenzinskaCrpka benzinskaCrpka) {
         this.benzinskaCrpka = benzinskaCrpka;
-    }
-
-    public Gorivo getGorivo() {
-        return gorivo;
-    }
-
-    public void setGorivo(Gorivo gorivo) {
-        this.gorivo = gorivo;
     }
 
 }

@@ -9,9 +9,12 @@ import Pomocno.HibernateUtil;
 import controller.Obrada;
 import java.math.BigDecimal;
 import java.util.List;
-import javax.swing.DefaultListModel;
-import javax.swing.JOptionPane;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import model.Djelatnik;
+import org.hibernate.Session;
 
 /**
  *
@@ -20,6 +23,10 @@ import model.Djelatnik;
 public class FormaDjelatnik extends Forma<Djelatnik> {
 
     public List<Djelatnik> rezultati;
+
+    public List<Djelatnik> getRezultati() {
+        return rezultati;
+    }
 
     /**
      * Creates new form FormaDjelatnik
@@ -34,16 +41,49 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
     @Override
     protected void ucitaj() {
 
-        rezultati = HibernateUtil.getSession().createQuery("from Djelatnik a where a.obrisan=false").list();
+        Session session = HibernateUtil.getSession();
+        session.clear();
+        rezultati = HibernateUtil.getSession().createQuery("from Djelatnik a where a.obrisan=false and nadredjeni is null").list();
         ucitavanje();
     }
+    private DefaultTreeModel modelStabla;
+    private boolean ucitavam;
 
     private void ucitavanje() {
-        DefaultListModel<Djelatnik> d = new DefaultListModel<>();
-        lstDjelatnici.setModel(d);
-        rezultati.forEach((s) -> {
-            d.addElement(s);
-        });
+        ucitavam = true;
+        modelStabla = (DefaultTreeModel) stablo.getModel();
+
+        modelStabla.setRoot(null);
+
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode();
+
+        root.setUserObject("Djelatnici");
+
+        DefaultMutableTreeNode node;
+        for (Djelatnik djelatnik : rezultati) {
+            node = new DefaultMutableTreeNode(djelatnik);
+            root.add(node);
+            ucitajStablo(node, djelatnik);
+            //System.out.println("root: " + predavac.getPrezime());
+        }
+        modelStabla.setRoot(root);
+
+        stablo.expandPath(new TreePath(root.getPath()));
+        ucitavam = false;
+    }
+
+    private void ucitajStablo(DefaultMutableTreeNode node, Djelatnik djelatnik) {
+        if (djelatnik.getPodredjeni()== null) {
+            return;
+        }
+        DefaultMutableTreeNode podredjeniNode;
+
+        for (Djelatnik podredjeniDjelatnik : djelatnik.getPodredjeni()) {
+            podredjeniNode = new DefaultMutableTreeNode(podredjeniDjelatnik);
+            node.add(podredjeniNode);
+            ucitajStablo(podredjeniNode, podredjeniDjelatnik);
+
+        }
     }
 
     @Override
@@ -54,8 +94,12 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
         entitet.setIban(txtIban.getText());
         entitet.setEmail(txtEmail.getText());
         entitet.setPlaca(new BigDecimal(txtPlaca.getText()));
+        Djelatnik d = (Djelatnik) cmbNadredjeni.getSelectedItem();
+
+        entitet.setNadredjeni(d.getSifra().equals(new Long(0)) ? null : d);
 
         super.spremi();
+
     }
 
     /**
@@ -68,8 +112,6 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        lstDjelatnici = new javax.swing.JList<>();
         btnDodaj = new javax.swing.JButton();
         btnPromjeni = new javax.swing.JButton();
         btnObrisi = new javax.swing.JButton();
@@ -85,18 +127,15 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
         txtEmail = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
         txtPlaca = new javax.swing.JTextField();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        stablo = new javax.swing.JTree();
+        cmbNadredjeni = new javax.swing.JComboBox<>();
+        jLabel8 = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jLabel1.setText("Popis djelatnika");
-
-        lstDjelatnici.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
-            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
-                lstDjelatniciValueChanged(evt);
-            }
-        });
-        jScrollPane1.setViewportView(lstDjelatnici);
 
         btnDodaj.setText("Dodaj");
         btnDodaj.addActionListener(new java.awt.event.ActionListener() {
@@ -131,6 +170,17 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
 
         jLabel7.setText("Plaća");
 
+        stablo.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
+            public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
+                stabloValueChanged(evt);
+            }
+        });
+        jScrollPane2.setViewportView(stablo);
+
+        cmbNadredjeni.setToolTipText("");
+
+        jLabel8.setText("Nadredjeni");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -142,97 +192,85 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
                 .addComponent(btnPromjeni)
                 .addGap(37, 37, 37)
                 .addComponent(btnObrisi)
-                .addContainerGap(94, Short.MAX_VALUE))
+                .addContainerGap(124, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGap(36, 36, 36)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 167, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel2)
                     .addComponent(jLabel3)
                     .addComponent(jLabel4)
-                    .addComponent(jLabel5)
                     .addComponent(jLabel6)
-                    .addComponent(jLabel7))
-                .addGap(137, 137, 137))
+                    .addComponent(jLabel7)
+                    .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cmbNadredjeni, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel5))
+                .addGap(64, 64, 64))
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup()
                     .addGap(49, 49, 49)
+                    .addComponent(jLabel1)
+                    .addGap(105, 105, 105)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jLabel1)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGap(43, 43, 43)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                         .addComponent(txtIme)
                         .addComponent(txtPrezime)
-                        .addComponent(txtOib, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
-                        .addComponent(txtIban)
+                        .addComponent(txtOib)
+                        .addComponent(txtPlaca, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(txtEmail)
-                        .addComponent(txtPlaca))
-                    .addContainerGap(75, Short.MAX_VALUE)))
+                        .addComponent(txtIban))
+                    .addGap(72, 72, 72)))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(23, 23, 23)
+                .addGap(21, 21, 21)
                 .addComponent(jLabel2)
                 .addGap(37, 37, 37)
                 .addComponent(jLabel3)
                 .addGap(44, 44, 44)
                 .addComponent(jLabel4)
-                .addGap(42, 42, 42)
+                .addGap(39, 39, 39)
                 .addComponent(jLabel5)
-                .addGap(42, 42, 42)
+                .addGap(45, 45, 45)
                 .addComponent(jLabel6)
                 .addGap(42, 42, 42)
                 .addComponent(jLabel7)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 170, Short.MAX_VALUE)
+                .addGap(47, 47, 47)
+                .addComponent(jLabel8)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(cmbNadredjeni, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 82, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnDodaj)
                     .addComponent(btnPromjeni)
                     .addComponent(btnObrisi))
                 .addGap(29, 29, 29))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(43, 43, 43)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup()
                     .addGap(14, 14, 14)
                     .addComponent(jLabel1)
                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                            .addComponent(txtIme, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGap(36, 36, 36)
-                            .addComponent(txtPrezime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGap(38, 38, 38)
-                            .addComponent(txtOib, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGap(36, 36, 36)
-                            .addComponent(txtIban, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGap(36, 36, 36)
-                            .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGap(36, 36, 36)
-                            .addComponent(txtPlaca, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 416, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addContainerGap(80, Short.MAX_VALUE)))
+                    .addComponent(txtIme, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(36, 36, 36)
+                    .addComponent(txtPrezime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(38, 38, 38)
+                    .addComponent(txtOib, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(36, 36, 36)
+                    .addComponent(txtIban, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(36, 36, 36)
+                    .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(36, 36, 36)
+                    .addComponent(txtPlaca, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(196, Short.MAX_VALUE)))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void lstDjelatniciValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_lstDjelatniciValueChanged
-        if (evt.getValueIsAdjusting()) {
-            return;
-        }
-
-        try {
-            this.entitet = lstDjelatnici.getSelectedValue();
-            txtIme.setText(lstDjelatnici.getSelectedValue().getIme());
-            txtPrezime.setText(lstDjelatnici.getSelectedValue().getPrezime());
-            txtOib.setText(lstDjelatnici.getSelectedValue().getOib());
-            txtIban.setText(lstDjelatnici.getSelectedValue().getIban());
-            txtEmail.setText(lstDjelatnici.getSelectedValue().getEmail());
-            txtPlaca.setText(lstDjelatnici.getSelectedValue().getPlaca().toString());
-
-        } catch (Exception e) {
-
-        }
-    }//GEN-LAST:event_lstDjelatniciValueChanged
 
     private void btnDodajActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDodajActionPerformed
         entitet = new Djelatnik();
@@ -240,24 +278,64 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
     }//GEN-LAST:event_btnDodajActionPerformed
 
     private void btnPromjeniActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPromjeniActionPerformed
-        if (lstDjelatnici.getSelectedValue() == null) {
-        }
-        JOptionPane.showConfirmDialog(rootPane, "Prvo odaberite stavku");
+
         spremi();
     }//GEN-LAST:event_btnPromjeniActionPerformed
 
     private void btnObrisiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnObrisiActionPerformed
-        if (lstDjelatnici.getSelectedValue() == null) {
-        }
-        JOptionPane.showConfirmDialog(rootPane, "Prvo odaberite stavku");
+
         obrisi();
     }//GEN-LAST:event_btnObrisiActionPerformed
+
+    private void stabloValueChanged(javax.swing.event.TreeSelectionEvent evt) {//GEN-FIRST:event_stabloValueChanged
+        if (ucitavam) {
+            return;
+        }
+
+        DefaultMutableTreeNode node
+                = (DefaultMutableTreeNode) stablo.getLastSelectedPathComponent();
+
+        if (node.getUserObject().getClass() != new Djelatnik().getClass()) {
+            return;
+        }
+
+        this.entitet = (Djelatnik) node.getUserObject();
+        this.txtIme.setText(entitet.getIme());
+        this.txtPrezime.setText(entitet.getPrezime());
+        this.txtOib.setText(entitet.getOib());
+        this.txtIban.setText(entitet.getIban());
+        this.txtEmail.setText(entitet.getEmail());
+        this.txtPlaca.setText(entitet.getPlaca().toString());
+
+        DefaultComboBoxModel<Djelatnik> d = new DefaultComboBoxModel<>();
+        cmbNadredjeni.setModel(d);
+        // if (entitet.getNadredeni() != null) {
+        Djelatnik root = new Djelatnik();
+        root.setIme("Root");
+        root.setPrezime("");
+        root.setSifra(new Long(0));
+        d.addElement(root);
+
+        // }
+        List<Djelatnik> nadredjeni = HibernateUtil.getSession().
+                createQuery("from Djelatnik a where "
+                        + "a.obrisan=false and a.sifra!=:sifra ")
+                .setLong("sifra", entitet.getSifra()).list();
+
+        nadredjeni.stream().map((dj) -> {
+            d.addElement(dj);
+            return dj;
+        }).filter((dj) -> (entitet.getNadredjeni() != null && entitet.getNadredjeni().getSifra().equals(dj.getSifra()))).forEachOrdered((_item) -> {
+            cmbNadredjeni.setSelectedItem(d);
+        });
+    }//GEN-LAST:event_stabloValueChanged
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnDodaj;
     private javax.swing.JButton btnObrisi;
     private javax.swing.JButton btnPromjeni;
+    private javax.swing.JComboBox<Djelatnik> cmbNadredjeni;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -265,8 +343,9 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JList<Djelatnik> lstDjelatnici;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTree stablo;
     private javax.swing.JTextField txtEmail;
     private javax.swing.JTextField txtIban;
     private javax.swing.JTextField txtIme;
@@ -274,4 +353,5 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
     private javax.swing.JTextField txtPlaca;
     private javax.swing.JTextField txtPrezime;
     // End of variables declaration//GEN-END:variables
+
 }

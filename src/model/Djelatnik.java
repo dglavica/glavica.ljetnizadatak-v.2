@@ -25,14 +25,14 @@ public class Djelatnik extends Entitet implements Serializable {
     private BigDecimal placa;
 
     @OneToMany(mappedBy = "nadredjeni")
-    private List<Djelatnik> djelatnici;
+    private List<Djelatnik> podredjeni;
 
-    public List<Djelatnik> getDjelatnici() {
-        return djelatnici;
+    public List<Djelatnik> getPodredjeni() {
+        return podredjeni;
     }
 
-    public void setDjelatnici(List<Djelatnik> djelatnici) {
-        this.djelatnici = djelatnici;
+    public void setPodredjeni(List<Djelatnik> podredjeni) {
+        this.podredjeni = podredjeni;
     }
 
     public Djelatnik getNadredjeni() {
@@ -106,7 +106,7 @@ public class Djelatnik extends Entitet implements Serializable {
 
     @Override
     public String toString() {
-        return "Djelatnik (" + ime + " " + prezime + ')';
+        return getIme() + " " + getPrezime();
 
     }
 

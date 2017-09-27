@@ -20,19 +20,19 @@ import javax.persistence.Table;
 @Table
 public class Gorivo extends Entitet implements Serializable {
 
+    @OneToMany(mappedBy = "gorivo")
+    private List<NarudzbaGorivo> narudzbaGoriva;
+
+    public List<NarudzbaGorivo> getNarudzbaGoriva() {
+        return narudzbaGoriva;
+    }
+
+    public void setNarudzbaGoriva(List<NarudzbaGorivo> narudzbaGoriva) {
+        this.narudzbaGoriva = narudzbaGoriva;
+    }
+
     private String vrsta;
     private BigDecimal prodajnaCijena, kapacitetSpremnika;
-
-    @OneToMany(mappedBy = "gorivo")
-    private List<NarudzbaCisterne> narudzbaCisterni;
-
-    public List<NarudzbaCisterne> getNarudzbaCisterni() {
-        return narudzbaCisterni;
-    }
-
-    public void setNarudzbaCisterni(List<NarudzbaCisterne> narudzbaCisterni) {
-        this.narudzbaCisterni = narudzbaCisterni;
-    }
 
     @OneToMany(mappedBy = "gorivo")
     private List<Tocenje> tocenja;

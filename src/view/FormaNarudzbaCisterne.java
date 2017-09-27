@@ -63,17 +63,13 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         txtVrijemeIsporuke = new javax.swing.JTextField();
-        jLabel4 = new javax.swing.JLabel();
-        txtKolicina = new javax.swing.JTextField();
-        jLabel5 = new javax.swing.JLabel();
-        txtNabavnaCijena = new javax.swing.JTextField();
         btnDodaj = new javax.swing.JButton();
         btnPromjeni = new javax.swing.JButton();
         btnObrisi = new javax.swing.JButton();
         txtTrosak = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         lstNarudzba.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
             public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
@@ -88,10 +84,6 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
         jLabel2.setText("Vrijeme narudzbe");
 
         jLabel3.setText("Vrijeme isporuke");
-
-        jLabel4.setText("Količina");
-
-        jLabel5.setText("Nabavna cijena");
 
         btnDodaj.setText("Dodaj");
         btnDodaj.addActionListener(new java.awt.event.ActionListener() {
@@ -136,13 +128,9 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
                         .addGap(43, 43, 43)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jLabel2)
-                            .addComponent(txtVrijemeNarudzbe)
+                            .addComponent(txtVrijemeNarudzbe, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
                             .addComponent(jLabel3)
                             .addComponent(txtVrijemeIsporuke)
-                            .addComponent(jLabel4)
-                            .addComponent(txtKolicina, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
-                            .addComponent(jLabel5)
-                            .addComponent(txtNabavnaCijena)
                             .addComponent(jLabel6)
                             .addComponent(txtTrosak))))
                 .addContainerGap(60, Short.MAX_VALUE))
@@ -162,20 +150,12 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(txtVrijemeIsporuke, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel4)
-                        .addGap(13, 13, 13)
-                        .addComponent(txtKolicina, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel5)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtNabavnaCijena, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGap(18, 18, 18)
                         .addComponent(jLabel6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtTrosak, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jScrollPane1))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 241, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnDodaj)
@@ -196,8 +176,6 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
             this.entitet = lstNarudzba.getSelectedValue();
             txtVrijemeNarudzbe.setText(lstNarudzba.getSelectedValue().getVrijemeNarudzbe().toString());
             txtVrijemeIsporuke.setText(lstNarudzba.getSelectedValue().getVrijemeIsporuke().toString());
-            txtKolicina.setText(lstNarudzba.getSelectedValue().getKolicina().toString());
-            txtNabavnaCijena.setText(lstNarudzba.getSelectedValue().getNabavnaCijena().toString());
             txtTrosak.setText(lstNarudzba.getSelectedValue().getTrosak().toString());
 
         } catch (Exception e) {
@@ -220,8 +198,6 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
     protected void spremi() {
         entitet.setVrijemeNarudzbe(new Date(txtVrijemeNarudzbe.getText()));
         entitet.setVrijemeIsporuke(new Date(txtVrijemeIsporuke.getText()));
-        entitet.setKolicina(new BigDecimal(txtKolicina.getText()));
-        entitet.setNabavnaCijena(new BigDecimal(txtNabavnaCijena.getText()));
         entitet.setTrosak(new BigDecimal(txtTrosak.getText()));
 
         super.spremi();
@@ -244,13 +220,9 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JList<NarudzbaCisterne> lstNarudzba;
-    private javax.swing.JTextField txtKolicina;
-    private javax.swing.JTextField txtNabavnaCijena;
     private javax.swing.JTextField txtTrosak;
     private javax.swing.JTextField txtVrijemeIsporuke;
     private javax.swing.JTextField txtVrijemeNarudzbe;

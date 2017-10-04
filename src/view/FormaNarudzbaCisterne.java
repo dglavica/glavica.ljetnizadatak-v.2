@@ -37,6 +37,7 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
 
         rezultati = HibernateUtil.getSession().createQuery("from NarudzbaCisterne a where a.obrisan=false").list();
         ucitavanje();
+        repaint();
     }
 
     private void ucitavanje() {

@@ -13,6 +13,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+import model.BenzinskaCrpka;
 import model.Djelatnik;
 import org.hibernate.Session;
 
@@ -34,8 +35,9 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
     public FormaDjelatnik() {
         initComponents();
         obrada = new Obrada();
-
+        ucitajBenzinskaCrpka();
         ucitaj();
+        repaint();
     }
 
     @Override
@@ -45,6 +47,7 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
         session.clear();
         rezultati = HibernateUtil.getSession().createQuery("from Djelatnik a where a.obrisan=false and nadredjeni is null").list();
         ucitavanje();
+       
     }
     private DefaultTreeModel modelStabla;
     private boolean ucitavam;
@@ -70,10 +73,11 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
 
         stablo.expandPath(new TreePath(root.getPath()));
         ucitavam = false;
+        repaint();
     }
 
     private void ucitajStablo(DefaultMutableTreeNode node, Djelatnik djelatnik) {
-        if (djelatnik.getPodredjeni()== null) {
+        if (djelatnik.getPodredjeni() == null) {
             return;
         }
         DefaultMutableTreeNode podredjeniNode;
@@ -82,6 +86,7 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
             podredjeniNode = new DefaultMutableTreeNode(podredjeniDjelatnik);
             node.add(podredjeniNode);
             ucitajStablo(podredjeniNode, podredjeniDjelatnik);
+            repaint();
 
         }
     }
@@ -131,6 +136,8 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
         stablo = new javax.swing.JTree();
         cmbNadredjeni = new javax.swing.JComboBox<>();
         jLabel8 = new javax.swing.JLabel();
+        cmbBenzinskaCrpka = new javax.swing.JComboBox<>();
+        jLabel9 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -181,6 +188,14 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
 
         jLabel8.setText("Nadredjeni");
 
+        cmbBenzinskaCrpka.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbBenzinskaCrpkaActionPerformed(evt);
+            }
+        });
+
+        jLabel9.setText("Benzinska crpka");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -195,7 +210,10 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
                 .addContainerGap(124, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(36, 36, 36)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 167, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE)
+                    .addComponent(cmbBenzinskaCrpka, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel2)
@@ -224,32 +242,38 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(21, 21, 21)
-                .addComponent(jLabel2)
-                .addGap(37, 37, 37)
-                .addComponent(jLabel3)
-                .addGap(44, 44, 44)
-                .addComponent(jLabel4)
-                .addGap(39, 39, 39)
-                .addComponent(jLabel5)
-                .addGap(45, 45, 45)
-                .addComponent(jLabel6)
-                .addGap(42, 42, 42)
-                .addComponent(jLabel7)
-                .addGap(47, 47, 47)
-                .addComponent(jLabel8)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(cmbNadredjeni, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 82, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(21, 21, 21)
+                        .addComponent(jLabel2)
+                        .addGap(37, 37, 37)
+                        .addComponent(jLabel3)
+                        .addGap(44, 44, 44)
+                        .addComponent(jLabel4)
+                        .addGap(39, 39, 39)
+                        .addComponent(jLabel5)
+                        .addGap(45, 45, 45)
+                        .addComponent(jLabel6)
+                        .addGap(42, 42, 42)
+                        .addComponent(jLabel7)
+                        .addGap(47, 47, 47)
+                        .addComponent(jLabel8)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(cmbNadredjeni, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 82, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(15, 15, 15)
+                        .addComponent(jLabel9)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(cmbBenzinskaCrpka, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(83, 83, 83)))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnDodaj)
                     .addComponent(btnPromjeni)
                     .addComponent(btnObrisi))
                 .addGap(29, 29, 29))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(43, 43, 43)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup()
                     .addGap(14, 14, 14)
@@ -328,13 +352,19 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
         }).filter((dj) -> (entitet.getNadredjeni() != null && entitet.getNadredjeni().getSifra().equals(dj.getSifra()))).forEachOrdered((_item) -> {
             cmbNadredjeni.setSelectedItem(d);
         });
+        repaint();
     }//GEN-LAST:event_stabloValueChanged
+
+    private void cmbBenzinskaCrpkaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbBenzinskaCrpkaActionPerformed
+        
+    }//GEN-LAST:event_cmbBenzinskaCrpkaActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnDodaj;
     private javax.swing.JButton btnObrisi;
     private javax.swing.JButton btnPromjeni;
+    private javax.swing.JComboBox<BenzinskaCrpka> cmbBenzinskaCrpka;
     private javax.swing.JComboBox<Djelatnik> cmbNadredjeni;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -344,6 +374,7 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTree stablo;
     private javax.swing.JTextField txtEmail;
@@ -353,5 +384,20 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
     private javax.swing.JTextField txtPlaca;
     private javax.swing.JTextField txtPrezime;
     // End of variables declaration//GEN-END:variables
+
+    private void ucitajBenzinskaCrpka() {
+        DefaultComboBoxModel<BenzinskaCrpka> bc = new DefaultComboBoxModel<>();
+        cmbBenzinskaCrpka.setModel(bc);
+        List<BenzinskaCrpka> crpka= HibernateUtil.getSession().
+                createQuery("from BenzinskaCrpka a where "
+                        + "a.obrisan=false  ").list();
+
+        for (BenzinskaCrpka b : crpka) {
+
+            bc.addElement(b);
+            cmbBenzinskaCrpka.setSelectedItem(b);
+
+        }
+    }
 
 }

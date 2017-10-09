@@ -26,6 +26,8 @@ public class NarudzbaCisterne extends Entitet implements Serializable {
     @OneToMany(mappedBy = "narudzbaCisterne")
     private List<NarudzbaGorivo> narudzbaGoriva;
 
+    
+
     @Temporal(javax.persistence.TemporalType.DATE)
     private Date vrijemeNarudzbe;
     @Temporal(javax.persistence.TemporalType.DATE)
@@ -73,6 +75,11 @@ public class NarudzbaCisterne extends Entitet implements Serializable {
 
     public void setBenzinskaCrpka(BenzinskaCrpka benzinskaCrpka) {
         this.benzinskaCrpka = benzinskaCrpka;
+    }
+    
+    @Override
+    public String toString() {
+        return "NarudzbaCisterne{" + "narudzbaGoriva=" + narudzbaGoriva + ", benzinskaCrpka=" + benzinskaCrpka + '}';
     }
 
 }

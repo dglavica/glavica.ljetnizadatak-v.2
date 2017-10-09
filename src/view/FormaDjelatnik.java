@@ -37,7 +37,7 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
         obrada = new Obrada();
         ucitajBenzinskaCrpka();
         ucitaj();
-        repaint();
+
     }
 
     @Override
@@ -47,7 +47,8 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
         session.clear();
         rezultati = HibernateUtil.getSession().createQuery("from Djelatnik a where a.obrisan=false and nadredjeni is null").list();
         ucitavanje();
-       
+        repaint();
+
     }
     private DefaultTreeModel modelStabla;
     private boolean ucitavam;
@@ -73,7 +74,7 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
 
         stablo.expandPath(new TreePath(root.getPath()));
         ucitavam = false;
-        repaint();
+
     }
 
     private void ucitajStablo(DefaultMutableTreeNode node, Djelatnik djelatnik) {
@@ -86,8 +87,6 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
             podredjeniNode = new DefaultMutableTreeNode(podredjeniDjelatnik);
             node.add(podredjeniNode);
             ucitajStablo(podredjeniNode, podredjeniDjelatnik);
-            repaint();
-
         }
     }
 
@@ -100,9 +99,9 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
         entitet.setEmail(txtEmail.getText());
         entitet.setPlaca(new BigDecimal(txtPlaca.getText()));
         Djelatnik d = (Djelatnik) cmbNadredjeni.getSelectedItem();
-
+        entitet.setBenzinskaCrpka(cmbBenzinskaCrpka.getItemAt(cmbBenzinskaCrpka.getSelectedIndex()));
         entitet.setNadredjeni(d.getSifra().equals(new Long(0)) ? null : d);
-
+        repaint();
         super.spremi();
 
     }
@@ -356,7 +355,7 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
     }//GEN-LAST:event_stabloValueChanged
 
     private void cmbBenzinskaCrpkaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbBenzinskaCrpkaActionPerformed
-        
+
     }//GEN-LAST:event_cmbBenzinskaCrpkaActionPerformed
 
 
@@ -388,7 +387,7 @@ public class FormaDjelatnik extends Forma<Djelatnik> {
     private void ucitajBenzinskaCrpka() {
         DefaultComboBoxModel<BenzinskaCrpka> bc = new DefaultComboBoxModel<>();
         cmbBenzinskaCrpka.setModel(bc);
-        List<BenzinskaCrpka> crpka= HibernateUtil.getSession().
+        List<BenzinskaCrpka> crpka = HibernateUtil.getSession().
                 createQuery("from BenzinskaCrpka a where "
                         + "a.obrisan=false  ").list();
 

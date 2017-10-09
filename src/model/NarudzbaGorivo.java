@@ -18,6 +18,8 @@ import javax.persistence.Table;
 @Entity
 @Table
 public class NarudzbaGorivo extends Entitet implements Serializable {
+
+    
     
     private BigDecimal kolicina, nabavnaCijena;
     
@@ -57,5 +59,12 @@ public class NarudzbaGorivo extends Entitet implements Serializable {
     public void setNarudzbaCisterne(NarudzbaCisterne narudzbaCisterne) {
         this.narudzbaCisterne = narudzbaCisterne;
     }
+
+    @Override
+    public String toString() {
+        return "NarudzbaGorivo{" + "gorivo=" + gorivo + '}';
+    }
+    
+   
     
 }

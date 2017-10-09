@@ -9,6 +9,7 @@ import Pomocno.HibernateUtil;
 import java.util.Date;
 import java.util.List;
 import model.Entitet;
+import model.NarudzbaGorivo;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
@@ -61,6 +62,19 @@ public class Obrada<T extends Entitet> {
         });
         session.getTransaction().commit();
         return lista;
+    }
+
+    public NarudzbaGorivo save(NarudzbaGorivo narudzbaGorivo) {
+        Date d = new Date();
+        if (narudzbaGorivo.getSifra() == null) {
+            narudzbaGorivo.setDatumKreiranja(d);
+        }
+        narudzbaGorivo.setDatumPromjene(d);
+        session.beginTransaction();
+        //System.out.println(entitet.hashCode());
+        session.saveOrUpdate(narudzbaGorivo);
+        session.getTransaction().commit();
+        return narudzbaGorivo;
     }
 
 }

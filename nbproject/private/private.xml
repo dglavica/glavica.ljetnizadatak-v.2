@@ -3,12 +3,15 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/C:/Users/Avalg/Documents/NetBeansProjects/glavica.ljetnizadatak/src/view/Forma.java</file>
             <file>file:/C:/Users/Avalg/Documents/NetBeansProjects/glavica.ljetnizadatak/src/view/FormaDjelatnik.java</file>
+            <file>file:/C:/Users/Avalg/Documents/NetBeansProjects/glavica.ljetnizadatak/src/controller/Obrada.java</file>
             <file>file:/C:/Users/Avalg/Documents/NetBeansProjects/glavica.ljetnizadatak/src/view/FormaNarudzbaCisterne.java</file>
             <file>file:/C:/Users/Avalg/Documents/NetBeansProjects/glavica.ljetnizadatak/src/Start/PocetniLoad.java</file>
             <file>file:/C:/Users/Avalg/Documents/NetBeansProjects/glavica.ljetnizadatak/src/Start/Start.java</file>
+            <file>file:/C:/Users/Avalg/Documents/NetBeansProjects/glavica.ljetnizadatak/src/model/NarudzbaGorivo.java</file>
+            <file>file:/C:/Users/Avalg/Documents/NetBeansProjects/glavica.ljetnizadatak/src/model/NarudzbaCisterne.java</file>
             <file>file:/C:/Users/Avalg/Documents/NetBeansProjects/glavica.ljetnizadatak/src/view/Izbornik.java</file>
-            <file>file:/C:/Users/Avalg/Documents/NetBeansProjects/glavica.ljetnizadatak/src/hibernate.cfg.xml</file>
         </group>
     </open-files>
 </project-private>

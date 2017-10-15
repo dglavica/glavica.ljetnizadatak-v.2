@@ -384,7 +384,7 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
 
     private void btnDodajActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDodajActionPerformed
         entitet = new NarudzbaCisterne();
-        narudzbaGorivo.setGorivo(gorivo);
+        narudzbaGorivo.setGorivo();
         spremi();
     }//GEN-LAST:event_btnDodajActionPerformed
 

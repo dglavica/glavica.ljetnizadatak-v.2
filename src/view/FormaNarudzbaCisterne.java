@@ -6,11 +6,16 @@
 package view;
 
 import Pomocno.HibernateUtil;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.swing.DefaultEventComboBoxModel;
+import com.github.lgooddatepicker.components.DatePicker;
 import controller.Obrada;
 import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
@@ -18,7 +23,6 @@ import model.BenzinskaCrpka;
 import model.Gorivo;
 import model.NarudzbaCisterne;
 import model.NarudzbaGorivo;
-import org.hibernate.Query;
 
 /**
  *
@@ -26,28 +30,39 @@ import org.hibernate.Query;
  */
 public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
 
-    private List<NarudzbaCisterne> rezultati;
-
     /**
      * Creates new form FormaTvrtka
      */
     private NarudzbaGorivo narudzbaGorivo;
-    private Gorivo gorivo;
-    private NarudzbaGorivo lstNarudzbaGorivo;
+
+    private List<Gorivo> goriva;
+
+    private DatePicker datumNarudzbe;
+    private DatePicker datumIsporuke;
 
     public FormaNarudzbaCisterne() {
         initComponents();
         obrada = new Obrada();
-        narudzbaGorivo = new NarudzbaGorivo();
-        gorivo = new Gorivo();
+
+        definirajKalendare();
         ucitajBenzinskeCrpke();
-        ucitajGorivo();
-        
-        
-       
+        goriva = HibernateUtil.getSession().createQuery("from Gorivo a where a.obrisan=false").list();
 
         ucitaj();
-        repaint();
+
+    }
+
+    private void definirajKalendare() {
+        datumNarudzbe = new DatePicker();
+        datumNarudzbe.setSize(pnlDatumNarudzbe.getSize());
+        datumNarudzbe.setLocale(new Locale("hr"));
+        pnlDatumNarudzbe.add(datumNarudzbe);
+
+        datumIsporuke = new DatePicker();
+        datumIsporuke.setSize(pnlDatumIsporuke.getSize());
+        datumIsporuke.setLocale(new Locale("hr"));
+        pnlDatumIsporuke.add(datumIsporuke);
+
     }
 
     private void ucitajBenzinskeCrpke() {
@@ -64,46 +79,49 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
 
         }
     }
-    private void ucitajNarudzbaGorivo(Long sifra) {
-        Query q =  HibernateUtil.getSession().
-                createQuery("from NarudzbaGorivo a where "
-                        + "a.obrisan=false and narudzbaCisterne_sifra = " + sifra);
-       lstNarudzbaGorivo = (NarudzbaGorivo) q.uniqueResult();
+
+    private void ucitajGoriva() {
+
+        EventList<Gorivo> go = new ca.odell.glazedlists.BasicEventList<>();
+        goriva.stream().forEach((g) -> {
+            if (entitet != null) {
+                boolean dodaj = true;
+                for (NarudzbaGorivo gorivo : entitet.getNarudzbaGoriva()) {
+                    if (g.getSifra().equals(gorivo.getSifra())) {
+                        dodaj = false;
+                        break;
+                    }
+                }
+                if (dodaj) {
+                    go.add(g);
+                }
+            }
+        });
+
+        DefaultEventComboBoxModel<Gorivo> model = new DefaultEventComboBoxModel<Gorivo>(go);
+        cmbGorivo.setModel(model);
     }
-        
-       
-
-    private void ucitajGorivo() {
-        DefaultComboBoxModel<Gorivo> go = new DefaultComboBoxModel<>();
-        cmbGorivo.setModel(go);
-        List<Gorivo> goriva = HibernateUtil.getSession().
-                createQuery("from Gorivo a where "
-                        + "a.obrisan=false  ").list();
-
-        for (Gorivo g : goriva) {
-
-            go.addElement(g);
-            cmbGorivo.setSelectedItem(g);
-
-        }
-    }
-
-  
 
     @Override
     protected void ucitaj() {
 
-        rezultati = HibernateUtil.getSession().createQuery("from NarudzbaCisterne a where a.obrisan=false").list();
-        ucitavanje();
-        repaint();
-    }
-
-    private void ucitavanje() {
         DefaultListModel<NarudzbaCisterne> nc = new DefaultListModel<>();
         lstNarudzba.setModel(nc);
-        rezultati.forEach((s) -> {
+        List<NarudzbaCisterne> l = HibernateUtil.getSession().createQuery("from NarudzbaCisterne a where a.obrisan=false").list();
+        l.forEach((s) -> {
             nc.addElement(s);
         });
+
+        System.out.println(entitet);
+        if (entitet != null) {
+            for (int i = 0; i < lstNarudzba.getModel().getSize(); i++) {
+                //System.out.println(lstEntiteti.getModel());
+                if (lstNarudzba.getModel().getElementAt(i).getSifra().equals(entitet.getSifra())) {
+                    lstNarudzba.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
     }
 
     /**
@@ -135,6 +153,11 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
         txtKolicina = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         txtNabavnaCijena = new javax.swing.JTextField();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        lstGoriva = new javax.swing.JList<>();
+        btnDodajGorivo = new javax.swing.JButton();
+        pnlDatumNarudzbe = new javax.swing.JPanel();
+        pnlDatumIsporuke = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -148,9 +171,9 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jLabel1.setText("Popis narudzbi");
 
-        jLabel2.setText("Vrijeme narudzbe");
+        jLabel2.setText("Datum narudžbe");
 
-        jLabel3.setText("Vrijeme isporuke");
+        jLabel3.setText("Datum Isporuke");
 
         btnDodaj.setText("Dodaj");
         btnDodaj.addActionListener(new java.awt.event.ActionListener() {
@@ -195,86 +218,130 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
 
         jLabel8.setText("Nabavna cijena");
 
+        jScrollPane2.setViewportView(lstGoriva);
+
+        btnDodajGorivo.setText("Dodaj Gorivo");
+        btnDodajGorivo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDodajGorivoActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout pnlDatumNarudzbeLayout = new javax.swing.GroupLayout(pnlDatumNarudzbe);
+        pnlDatumNarudzbe.setLayout(pnlDatumNarudzbeLayout);
+        pnlDatumNarudzbeLayout.setHorizontalGroup(
+            pnlDatumNarudzbeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 170, Short.MAX_VALUE)
+        );
+        pnlDatumNarudzbeLayout.setVerticalGroup(
+            pnlDatumNarudzbeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 58, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout pnlDatumIsporukeLayout = new javax.swing.GroupLayout(pnlDatumIsporuke);
+        pnlDatumIsporuke.setLayout(pnlDatumIsporukeLayout);
+        pnlDatumIsporukeLayout.setHorizontalGroup(
+            pnlDatumIsporukeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        pnlDatumIsporukeLayout.setVerticalGroup(
+            pnlDatumIsporukeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 59, Short.MAX_VALUE)
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addGap(38, 38, 38)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 464, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 37, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                .addComponent(jLabel4)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                            .addGroup(layout.createSequentialGroup()
                                 .addComponent(btnDodaj)
                                 .addGap(39, 39, 39)
                                 .addComponent(btnPromjeni)
                                 .addGap(37, 37, 37)
-                                .addComponent(btnObrisi)))
-                        .addGap(161, 161, 161))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(cmbBenzinskaCrpka, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(cmbGorivo, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(89, 89, 89)))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(txtNabavnaCijena, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(txtVrijemeNarudzbe, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
-                        .addComponent(jLabel2)
-                        .addComponent(jLabel3)
-                        .addComponent(txtVrijemeIsporuke, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
-                        .addComponent(jLabel6)
-                        .addComponent(txtTrosak, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
-                        .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(txtKolicina)
-                        .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addGap(46, 46, 46))
+                                .addComponent(btnObrisi))
+                            .addComponent(jLabel1)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 449, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 449, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtVrijemeNarudzbe)
+                            .addComponent(txtTrosak)
+                            .addComponent(txtKolicina)
+                            .addComponent(txtNabavnaCijena)
+                            .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(pnlDatumIsporuke, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(txtVrijemeIsporuke)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel6)
+                                    .addComponent(jLabel3)
+                                    .addComponent(jLabel2)
+                                    .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(pnlDatumNarudzbe, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(0, 0, Short.MAX_VALUE))))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(cmbGorivo, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(btnDodajGorivo))
+                            .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(169, 169, 169)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel4)
+                            .addComponent(cmbBenzinskaCrpka, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addGap(52, 52, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(24, 24, 24)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(jLabel2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel1)
+                .addGap(22, 22, 22)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(txtVrijemeNarudzbe, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(11, 11, 11)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(pnlDatumNarudzbe, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(txtVrijemeIsporuke, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtTrosak, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24, Short.MAX_VALUE)
-                        .addComponent(jLabel7))
+                        .addComponent(pnlDatumIsporuke, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel6)
+                        .addGap(12, 12, 12)
+                        .addComponent(txtTrosak, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jScrollPane1))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
                     .addComponent(jLabel5)
-                    .addComponent(txtKolicina, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel4))
                 .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(cmbBenzinskaCrpka, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(cmbGorivo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jLabel8))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtNabavnaCijena, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cmbGorivo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cmbBenzinskaCrpka, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnDodajGorivo))
+                .addGap(27, 27, 27)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel7)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtKolicina, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel8)
+                        .addGap(18, 18, 18)
+                        .addComponent(txtNabavnaCijena, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(32, 32, 32)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnDodaj)
                     .addComponent(btnPromjeni)
@@ -289,19 +356,27 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
         if (evt.getValueIsAdjusting()) {
             return;
         }
+        if (lstNarudzba.getSelectedValue() == null) {
+            return;
+        }
 
         try {
             this.entitet = lstNarudzba.getSelectedValue();
-            ucitajNarudzbaGorivo(entitet.getSifra());
 
-            txtVrijemeNarudzbe.setText(lstNarudzba.getSelectedValue().getVrijemeNarudzbe().toString());
-            txtVrijemeIsporuke.setText(lstNarudzba.getSelectedValue().getVrijemeIsporuke().toString());
+            txtVrijemeNarudzbe.setText(datumNarudzbe.getDateStringOrEmptyString());
+            txtVrijemeIsporuke.setText(datumIsporuke.getDateStringOrEmptyString());
             txtTrosak.setText(lstNarudzba.getSelectedValue().getTrosak().toString());
-            if(lstNarudzbaGorivo != null) {
-                txtKolicina.setText(lstNarudzbaGorivo.getKolicina().toString());
-                txtNabavnaCijena.setText(lstNarudzbaGorivo.getNabavnaCijena().toString());
-            }
-       
+            txtNabavnaCijena.setText(narudzbaGorivo.getNabavnaCijena().toString());
+            txtKolicina.setText(narudzbaGorivo.getKolicina().toString());
+            cmbGorivo.setSelectedItem(narudzbaGorivo.getGorivo());
+            cmbBenzinskaCrpka.setSelectedItem(entitet.getBenzinskaCrpka());
+
+            DefaultListModel<Gorivo> go = new DefaultListModel<>();
+            lstGoriva.setModel(go);
+            go.addElement(narudzbaGorivo.getGorivo());
+
+            ucitajGoriva();
+
         } catch (Exception e) {
 
         }
@@ -309,6 +384,7 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
 
     private void btnDodajActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDodajActionPerformed
         entitet = new NarudzbaCisterne();
+        narudzbaGorivo.setGorivo(gorivo);
         spremi();
     }//GEN-LAST:event_btnDodajActionPerformed
 
@@ -322,18 +398,22 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
     @Override
     protected void spremi() {
         try {
-            DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
-            //provjere da date i ostale stvari nisu prazne
-            entitet.setVrijemeNarudzbe(df.parse(txtVrijemeNarudzbe.getText()));
-            entitet.setVrijemeIsporuke(df.parse(txtVrijemeIsporuke.getText()));
+
+            entitet.setVrijemeNarudzbe((datumNarudzbe.getDate()));
+            entitet.setVrijemeIsporuke((datumIsporuke.getDate()));
             entitet.setTrosak(new BigDecimal(txtTrosak.getText()));
             entitet.setBenzinskaCrpka(cmbBenzinskaCrpka.getItemAt(cmbBenzinskaCrpka.getSelectedIndex()));
             narudzbaGorivo.setKolicina(new BigDecimal(txtKolicina.getText()));
             narudzbaGorivo.setNabavnaCijena(new BigDecimal(txtNabavnaCijena.getText()));
             narudzbaGorivo.setGorivo(cmbGorivo.getItemAt(cmbGorivo.getSelectedIndex()));
-            narudzbaGorivo.setNarudzbaCisterne(entitet);
+
+            Date dn = Date.from(datumNarudzbe.getDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Date di = Date.from(datumIsporuke.getDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+            entitet.setVrijemeNarudzbe(dn);
+            entitet.setVrijemeIsporuke(di);
+
             super.spremi();
-            super.spremi(narudzbaGorivo);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -354,12 +434,25 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
         // TODO add your handling code here:
     }//GEN-LAST:event_cmbGorivoActionPerformed
 
+    private void btnDodajGorivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDodajGorivoActionPerformed
+        if (cmbGorivo.getSelectedItem() == null) {
+            return;
+        }
+        Gorivo g = (Gorivo) cmbGorivo.getSelectedItem();
+        NarudzbaGorivo ng = new NarudzbaGorivo();
+        ng.setGorivo(g);
+        ng.setNarudzbaCisterne(entitet);
+        entitet.getNarudzbaGoriva().add(ng);
+        spremi();
+    }//GEN-LAST:event_btnDodajGorivoActionPerformed
+
     /**
      * @param args the command line arguments
      */
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnDodaj;
+    private javax.swing.JButton btnDodajGorivo;
     private javax.swing.JButton btnObrisi;
     private javax.swing.JButton btnPromjeni;
     private javax.swing.JComboBox<BenzinskaCrpka> cmbBenzinskaCrpka;
@@ -373,7 +466,11 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JList<Gorivo> lstGoriva;
     private javax.swing.JList<NarudzbaCisterne> lstNarudzba;
+    private javax.swing.JPanel pnlDatumIsporuke;
+    private javax.swing.JPanel pnlDatumNarudzbe;
     private javax.swing.JTextField txtKolicina;
     private javax.swing.JTextField txtNabavnaCijena;
     private javax.swing.JTextField txtTrosak;
@@ -381,5 +478,4 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
     private javax.swing.JTextField txtVrijemeNarudzbe;
     // End of variables declaration//GEN-END:variables
 
-    
 }

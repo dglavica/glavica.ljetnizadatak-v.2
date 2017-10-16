@@ -82,7 +82,7 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
 
     private void ucitajGoriva() {
 
-        EventList<Gorivo> go = new ca.odell.glazedlists.BasicEventList<>();
+        EventList<Gorivo> go = (EventList<Gorivo>) new BasicEventList();
         goriva.stream().forEach((g) -> {
             if (entitet != null) {
                 boolean dodaj = true;
@@ -100,6 +100,7 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
 
         DefaultEventComboBoxModel<Gorivo> model = new DefaultEventComboBoxModel<Gorivo>(go);
         cmbGorivo.setModel(model);
+
     }
 
     @Override
@@ -207,12 +208,6 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
         jLabel4.setText("Benzinska crpka");
 
         jLabel5.setText("Gorivo");
-
-        cmbGorivo.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmbGorivoActionPerformed(evt);
-            }
-        });
 
         jLabel7.setText("Količina");
 
@@ -384,7 +379,7 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
 
     private void btnDodajActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDodajActionPerformed
         entitet = new NarudzbaCisterne();
-        narudzbaGorivo.setGorivo();
+
         spremi();
     }//GEN-LAST:event_btnDodajActionPerformed
 
@@ -397,26 +392,19 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
     }//GEN-LAST:event_btnPromjeniActionPerformed
     @Override
     protected void spremi() {
-        try {
+       
 
-            entitet.setVrijemeNarudzbe((datumNarudzbe.getDate()));
-            entitet.setVrijemeIsporuke((datumIsporuke.getDate()));
+            entitet.setVrijemeNarudzbe(Date.from(datumNarudzbe.getDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+            entitet.setVrijemeIsporuke(Date.from(datumIsporuke.getDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
             entitet.setTrosak(new BigDecimal(txtTrosak.getText()));
             entitet.setBenzinskaCrpka(cmbBenzinskaCrpka.getItemAt(cmbBenzinskaCrpka.getSelectedIndex()));
             narudzbaGorivo.setKolicina(new BigDecimal(txtKolicina.getText()));
             narudzbaGorivo.setNabavnaCijena(new BigDecimal(txtNabavnaCijena.getText()));
             narudzbaGorivo.setGorivo(cmbGorivo.getItemAt(cmbGorivo.getSelectedIndex()));
 
-            Date dn = Date.from(datumNarudzbe.getDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
-            Date di = Date.from(datumIsporuke.getDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
-            entitet.setVrijemeNarudzbe(dn);
-            entitet.setVrijemeIsporuke(di);
-
             super.spremi();
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+       
     }
     private void btnObrisiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnObrisiActionPerformed
         if (lstNarudzba.getSelectedValue() == null) {
@@ -429,10 +417,6 @@ public class FormaNarudzbaCisterne extends Forma<NarudzbaCisterne> {
     private void cmbBenzinskaCrpkaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbBenzinskaCrpkaActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_cmbBenzinskaCrpkaActionPerformed
-
-    private void cmbGorivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbGorivoActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_cmbGorivoActionPerformed
 
     private void btnDodajGorivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDodajGorivoActionPerformed
         if (cmbGorivo.getSelectedItem() == null) {
